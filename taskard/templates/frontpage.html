@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<form action="{{ url_for("boards") }}" method="post">
+	<label>
+		board name:
+		<input type="text" name="board-title">
+	</label>
+
+	<button type="submit">create board</button>
+</form>
+{% endblock %}
