@@ -8,5 +8,6 @@ from taskard.web import app
 settings = {}
 if sys.argv[1:2] == ["--dev"]: # XXX: crude
     settings["debug"] = True
+    app.config["SQLALCHEMY_ECHO"] = True # XXX: should not be necessary!?
 
 app.run(**settings)

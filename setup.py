@@ -1,5 +1,5 @@
 META = {
-    "install_requires": ["Flask", "SQLAlchemy"],
+    "install_requires": ["Flask", "Flask-SQLAlchemy"],
     "extras_require": {
         "linting": ["pep8"]
     }
