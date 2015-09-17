@@ -2,9 +2,24 @@
 
 {% block body %}
 <h1>{{ board.title }}</h1>
-<ul>
-	{% for state in board.states %}
-	<li>{{ state }}</li>
-	{% endfor %}
-</ul>
+<table>
+	<thead>
+		<tr>
+			<th></th>
+			{% for state in board.states %}
+			<th>{{ state }}</th>
+			{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for lane in board.lanes %}
+		<tr>
+			<td>{{ lane }}</td>
+			{% for state in board.states %}
+			<td></td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
 {% endblock %}

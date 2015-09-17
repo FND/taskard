@@ -10,19 +10,29 @@ class Board(database.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, unique=True)
+    lanes = db.Column(CSVEncodedList)
     states = db.Column(CSVEncodedList)
 
+    default_lanes = ["my project"]
     default_states = ["to do", "in progress", "done"]
 
-    def __init__(self, title, states=None, id=None):
-        if not title:
-            raise ValidationError("invalid title")
-
+    def __init__(self, title, lanes=None, states=None, id=None):
         self.id = id
         self.title = title
+        self.lanes = self.default_lanes if lanes is None else lanes
         self.states = self.default_states if states is None else states
+
+        self.validate()
+
+    def validate(self):
+        if not self.title:
+            raise ValidationError("invalid board title")
+
+        if has_duplicates(self.lanes):
+            raise ValidationError("lanes must be unique per board")
+
         if has_duplicates(self.states):
-            raise ValidationError("board states must be unique")
+            raise ValidationError("states must be unique per board")
 
 
 class ValidationError(Exception):
