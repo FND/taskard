@@ -17,7 +17,7 @@ DB.create_all(app=app)
 
 @app.route("/")
 def frontpage():
-    return render_template("frontpage.html")
+    return _render("frontpage.html")
 
 
 @app.route("/boards", methods=["GET", "POST"])
@@ -37,9 +37,22 @@ def boards():
 
         return redirect(url_for("board", board_id=board.id))
 
-    return render_template("frontpage.html")
+    return _render("boards.html", title="Boards Overview", boards=Board.query.all())
 
 
 @app.route("/boards/<board_id>")
 def board(board_id):
-    return board_id # TODO
+    board = Board.query.filter_by(id=board_id).first()
+    if not board:
+        abort(404, "board does exist or access is restricted") # TODO: friendly error
+
+    return _render("boards.html", title=board.title, boards=[board]) # TODO
+
+
+def _render(template, **params):
+    try:
+        params["title"] = "%s | Taskard" % params["title"]
+    except KeyError:
+        params["title"] = "Taskard"
+
+    return render_template(template, **params)

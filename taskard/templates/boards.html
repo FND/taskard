@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<ul>
+	{% for board in boards %}
+	<li>
+		<a href="{{ url_for("board", board_id=board.id) }}">{{ board.title }}</a>
+	</li>
+	{% endfor %}
+</ul>
+{% endblock %}
