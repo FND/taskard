@@ -8,16 +8,14 @@ database = db = SQLAlchemy()
 
 class Board(database.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, unique=True)
+    title = db.Column(db.String, primary_key=True) # TODO: enforce lowercase?
     lanes = db.Column(CSVEncodedList)
     states = db.Column(CSVEncodedList)
 
     default_lanes = ["my project"]
     default_states = ["to do", "in progress", "done"]
 
-    def __init__(self, title, lanes=None, states=None, id=None):
-        self.id = id
+    def __init__(self, title, lanes=None, states=None):
         self.title = title
         self.lanes = self.default_lanes if lanes is None else lanes
         self.states = self.default_states if states is None else states

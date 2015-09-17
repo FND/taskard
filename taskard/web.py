@@ -33,18 +33,18 @@ def boards():
         try:
             DB.session.commit()
         except IntegrityError:
-            abort(400, "board '%s' already exists" % board.title) # TODO: friendly error
+            abort(400, "board '%s' already exists" % board.title)
 
-        return redirect(url_for("board", board_id=board.id))
+        return redirect(url_for("board", board_title=board.title))
 
     return _render("boards.html", title="Boards Overview", boards=Board.query.all())
 
 
-@app.route("/boards/<board_id>")
-def board(board_id):
-    board = Board.query.filter_by(id=board_id).first()
+@app.route("/boards/<board_title>")
+def board(board_title):
+    board = Board.query.filter_by(title=board_title).first()
     if not board:
-        abort(404, "board does exist or access is restricted") # TODO: friendly error
+        abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
     return _render("board.html", title=board.title, board=board)
 
