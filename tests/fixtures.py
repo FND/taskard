@@ -5,7 +5,7 @@ from taskard.models import Board, Task, init_database
 
 def create_sample_database():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:" # TODO: read from instance config
 
     app_context = app.app_context() # TODO: use `test_request_context`?
     app_context.push()

@@ -15,6 +15,9 @@ indent_size = 4
 max_line_length = 79
 indent_style = space
 
+[*.yaml]
+indent_style = space
+
 [COMMIT_EDITMSG]
 trim_trailing_whitespace = false
 max_line_length = 72

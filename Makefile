@@ -12,8 +12,18 @@ shell:
 			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
 			logging.activate_sql_logging(app)"
 
-test:
+test: test-http test-unit
+
+test-unit:
 	. venv/bin/activate; py.test -v -x tests
+
+test-http:
+	. venv/bin/activate; python server --dev -p 5555 & \
+			echo $$! > tests/server.pid
+	`which gabbi-run` localhost:5555 < tests/http.yaml; \
+			exit_code="$$?"; \
+			kill `cat tests/server.pid` && rm tests/server.pid; \
+			[ "$$exit_code" -eq 0 ] || false
 
 lint:
 	pep8 server *.py taskard tests
@@ -25,4 +35,4 @@ clean:
 	find . -name "*.pyc" | xargs rm || true
 	find . -name "__pycache__" | xargs rm -r || true
 
-.PHONY: server shell test lint reset clean
+.PHONY: server shell test test-http test-unit lint reset clean

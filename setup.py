@@ -1,7 +1,7 @@
 META = {
     "install_requires": ["Flask", "Flask-SQLAlchemy"],
     "extras_require": {
-        "testing": ["pytest"],
+        "testing": ["gabbi", "pytest"],
         "linting": ["pep8"]
     }
 }
