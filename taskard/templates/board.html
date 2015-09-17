@@ -22,4 +22,13 @@
 		{% endfor %}
 	</tbody>
 </table>
+
+<ul>
+	{% for task in board.tasks %}
+	<li>
+		<h3>{{ task.title }}</h3>
+		<p>{{ task.desc }}</p>
+	</li>
+	{% endfor %}
+</ul>
 {% endblock %}

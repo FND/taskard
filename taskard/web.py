@@ -1,9 +1,10 @@
 import os
 
 from flask import Flask, render_template, abort, redirect, url_for, request
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
-from .models import database as DB, Board, ValidationError
+from .models import database as DB, Board, Task, ValidationError
 
 
 app = Flask(__name__, instance_path=os.path.abspath("."),
@@ -25,14 +26,20 @@ def boards():
     if request.method == "POST":
         title = request.form.get("board-title")
         try:
-            board = Board(title)
+            board = Board(title, ["my project"], ["to do", "in progress", "done"])
         except ValidationError as err:
             abort(400, err) # TODO: friendly error
 
+        task = Task("hello world", "my project", "to do", "lorem ipsum")
+        board.add_task(task)
+
         DB.session.add(board)
+        DB.session.add(task)
         try:
             DB.session.commit()
-        except IntegrityError:
+        except IntegrityError as err:
+            # XXX: revealing existence here is inconsistent with intentionally
+            #      unspecific 404 for indivdual boards
             abort(400, "board '%s' already exists" % board.title)
 
         return redirect(url_for("board", board_title=board.title))
@@ -42,7 +49,7 @@ def boards():
 
 @app.route("/boards/<board_title>")
 def board(board_title):
-    board = Board.query.filter_by(title=board_title).first()
+    board = Board.query.options(joinedload("tasks")).filter_by(title=board_title).first()
     if not board:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
