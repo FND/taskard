@@ -46,7 +46,7 @@ def board(board_id):
     if not board:
         abort(404, "board does exist or access is restricted") # TODO: friendly error
 
-    return _render("boards.html", title=board.title, boards=[board]) # TODO
+    return _render("board.html", title=board.title, board=board)
 
 
 def _render(template, **params):

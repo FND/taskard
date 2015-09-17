@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>{{ board.title }}</h1>
+<ul>
+	{% for state in board.states %}
+	<li>{{ state }}</li>
+	{% endfor %}
+</ul>
+{% endblock %}

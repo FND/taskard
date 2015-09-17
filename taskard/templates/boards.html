@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<h1>Boards Overview</h1>
+{% if boards %}
 <ul>
 	{% for board in boards %}
 	<li>
@@ -8,4 +10,7 @@
 	</li>
 	{% endfor %}
 </ul>
+{% else %}
+<p>no boards exist yet</p>
+{% endif %}
 {% endblock %}
