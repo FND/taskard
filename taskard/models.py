@@ -6,8 +6,8 @@ from .database import CSVEncodedList
 database = db = SQLAlchemy()
 
 
-class Board(database.Model):
-
+class Board(db.Model):
+    __tablename__ = "boards"
     title = db.Column(db.String, primary_key=True) # TODO: enforce lowercase?
     lanes = db.Column(CSVEncodedList)
     states = db.Column(CSVEncodedList)
