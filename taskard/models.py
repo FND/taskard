@@ -3,7 +3,13 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from .database import CSVEncodedList
 
 
-database = db = SQLAlchemy()
+db = SQLAlchemy()
+
+
+def init_database(app): # TODO: idempotent?
+    db.init_app(app)
+    db.create_all(app=app)
+    return db
 
 
 class Board(db.Model):

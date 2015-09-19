@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, abort, redirect, url_for, request
 
 from . import commands as cmd
-from .models import database as DB, Board, ValidationError
+from .models import init_database, Board, ValidationError
 
 
 app = Flask(__name__, instance_path=os.path.abspath("."),
@@ -11,8 +11,7 @@ app = Flask(__name__, instance_path=os.path.abspath("."),
 
 db_path = os.path.join(app.instance_path, "taskard.sqlite")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_path # TODO: read from instance config
-DB.init_app(app)
-DB.create_all(app=app)
+DB = init_database(app)
 
 
 @app.route("/")
