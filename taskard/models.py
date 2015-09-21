@@ -86,7 +86,7 @@ class Task(db.Model, Record):
         self.desc = desc
 
     def __repr__(self):
-        return "<Task '%s'>" % self.title
+        return "<Task '%s' lane='%s' state='%s'>" % (self.title, self.lane, self.state)
 
 
 class ValidationError(Exception):

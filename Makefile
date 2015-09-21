@@ -8,8 +8,11 @@ shell:
 			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
 			app.config['SQLALCHEMY_ECHO'] = True"
 
+test:
+	. venv/bin/activate; py.test -v -x tests
+
 lint:
-	pep8 server *.py taskard
+	pep8 server *.py taskard tests
 
 reset: clean
 	rm *.sqlite || true
@@ -18,4 +21,4 @@ clean:
 	find . -name "*.pyc" | xargs rm || true
 	find . -name "__pycache__" | xargs rm -r || true
 
-.PHONY: server shell lint reset clean
+.PHONY: server shell test lint reset clean

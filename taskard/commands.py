@@ -1,3 +1,6 @@
+from collections import defaultdict
+from itertools import groupby
+
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
@@ -24,6 +27,26 @@ def create_default_board(db, title):
         raise ConflictError("board '%s' already exists" % board.title) from err
 
     return board
+
+
+def retrieve_task_matrix(board, lane=None, state=None):
+    """
+    returns ordered tasks categorized by lane and state for a given `Board` or
+    board title, optionally limited to a specific lane and/or state
+    """
+    board_title = board.title if isinstance(board, Board) else board
+
+    tasks = Task.query.filter_by(board_title=board_title)
+    if lane:
+        tasks = tasks.filter_by(lane=lane)
+    if state:
+        tasks = tasks.filter_by(state=state)
+
+    matrix = defaultdict(dict) # `{ lane: { state: [tasks] } }`
+    for lane, group in groupby(tasks.all(), lambda task: task.lane):
+        for state, tasks in groupby(group, lambda task: task.state):
+            matrix[lane][state] = list(tasks)
+    return dict(matrix)
 
 
 def retrieve_board_with_tasks(title): # TODO: rename?
