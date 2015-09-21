@@ -1,4 +1,5 @@
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declared_attr
 
 from .database import CSVEncodedList
 
@@ -12,7 +13,24 @@ def init_database(app): # TODO: idempotent?
     return db
 
 
-class Board(db.Model):
+class Record:
+    """
+    mix-in to be used with all models
+    """
+
+    # NB: `declared_attr` defers creation, moving the respective column the end
+
+    @declared_attr
+    def created_at(cls):
+        return db.Column(db.DateTime, server_default=db.func.now())
+
+    @declared_attr
+    def updated_at(cls):
+        return db.Column(db.DateTime, server_default=db.func.now(),
+                onupdate=db.func.now())
+
+
+class Board(db.Model, Record):
     __tablename__ = "boards"
 
     title = db.Column(db.String, primary_key=True) # TODO: enforce lowercase?
@@ -49,7 +67,7 @@ class Board(db.Model):
         return "<Board '%s'>" % self.title
 
 
-class Task(db.Model):
+class Task(db.Model, Record):
     __tablename__ = "tasks"
 
     id = db.Column(db.Integer, primary_key=True)
