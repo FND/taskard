@@ -2,7 +2,7 @@ import csv
 
 import pytest
 
-from taskard.database import CSVEncodedList
+from taskard.database import CSVEncodedTable, CSVEncodedList
 
 
 DB_DIALECT = None
@@ -50,3 +50,54 @@ def test_matrix_deserialization():
     db_contents = "hello,world\r\nfoo,bar,baz\r\nlorem,ipsum"
     values = serializer.process_result_value(db_contents, DB_DIALECT)
     assert values == [["hello", "world"], ["foo", "bar", "baz"], ["lorem", "ipsum"]]
+
+
+def test_table_serialization():
+    serializer = CSVEncodedTable(["serious project", "silly project"],
+            ["to do", "in progress", "done"])
+
+    values = {
+        "serious project": {
+            "to do": [1, 3, 5],
+            "done": [2, 4]
+        },
+        "silly project": {
+            "to do": [6],
+            "in progress": [7],
+            "done": [8]
+        }
+    }
+    db_contents = serializer.process_bind_param(values, DB_DIALECT)
+    expected = "\r\n".join([
+        "serious project,to do,1,3,5",
+        "serious project,done,2,4",
+        "silly project,to do,6",
+        "silly project,in progress,7",
+        "silly project,done,8"
+    ])
+    assert db_contents == expected
+
+
+def test_table_deserialization():
+    serializer = CSVEncodedTable(["serious project", "silly project"],
+            ["to do", "in progress", "done"])
+
+    db_contents = "\r\n".join([
+        "serious project,to do,1,3,5",
+        "serious project,done,2,4",
+        "silly project,to do,6",
+        "silly project,in progress,7",
+        "silly project,done,8"
+    ])
+    values = serializer.process_result_value(db_contents, DB_DIALECT)
+    assert values == {
+        "serious project": {
+            "to do": ["1", "3", "5"],
+            "done": ["2", "4"]
+        },
+        "silly project": {
+            "to do": ["6"],
+            "in progress": ["7"],
+            "done": ["8"]
+        }
+    }

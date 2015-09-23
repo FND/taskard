@@ -1,5 +1,6 @@
 import csv
 
+from collections import defaultdict
 from io import StringIO
 
 from sqlalchemy.types import TypeDecorator, String
@@ -49,3 +50,34 @@ class CSVEncodedList(TypeDecorator):
         else:
             reader = csv.reader([value])
             return list(reader)[0]
+
+
+class CSVEncodedTable(CSVEncodedList):
+
+    def __init__(self, rows, columns, *args, **kwargs):
+        super().__init__(*args, matrix=True, **kwargs)
+        self.rows = rows
+        self.columns = columns
+
+    def process_bind_param(self, table, dialect):
+        values = []
+        for row in self.rows:
+            for column in self.columns:
+                try:
+                    items = table[row][column]
+                    values.append([row, column] + items)
+                except KeyError:
+                    continue
+
+        return super().process_bind_param(values, dialect)
+
+    def process_result_value(self, value, dialect):
+        values = super().process_result_value(value, dialect)
+
+        table = defaultdict(dict)
+        for items in values:
+            row = items.pop(0)
+            column = items.pop(0)
+            table[row][column] = items
+
+        return dict(table)
