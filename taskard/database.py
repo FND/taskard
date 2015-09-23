@@ -2,7 +2,7 @@ import csv
 
 from io import StringIO
 
-from sqlalchemy.types import TypeDecorator, VARCHAR
+from sqlalchemy.types import TypeDecorator, String
 
 
 class CSVEncodedList(TypeDecorator):
@@ -12,13 +12,17 @@ class CSVEncodedList(TypeDecorator):
     `matrix` indicates whether nested lists are to be supported
     """
 
-    impl = VARCHAR
+    impl = String
 
     def __init__(self, *args, matrix=False, **kwargs):
         super().__init__(*args, **kwargs) # XXX: cargo-culted
-        self.matrix = matrix
+        self.matrix = matrix # XXX: misnomer; not actually a matrix, but nested lists
 
     def process_bind_param(self, values, dialect):
+        """
+        serialize a list of values (or, with `matrix`, a list of lists of
+        values) into a CSV string
+        """
         if values is None:
             return None
 
@@ -32,6 +36,10 @@ class CSVEncodedList(TypeDecorator):
         return output.getvalue().strip()
 
     def process_result_value(self, value, dialect):
+        """
+        deserialize a list of values (or, with `matrix`, a list of lists of
+        values) from a CSV string
+        """
         if value is None:
             return []
 
