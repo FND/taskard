@@ -69,6 +69,9 @@ class CSVEncodedTable(CSVEncodedList):
         """
         serialize dictionary into a CSV string
         """
+        if table is None:
+            return None
+
         values = []
         for row, columns in table.items():
             for column, items in columns.items():
@@ -81,6 +84,9 @@ class CSVEncodedTable(CSVEncodedList):
         """
         deserialize dictionary from a CSV string
         """
+        if csv_string is None:
+            return {}
+
         values = super().process_result_value(csv_string, dialect)
 
         table = defaultdict(dict)

@@ -11,6 +11,10 @@ DB_DIALECT = None
 def test_simple_serialization():
     serializer = CSVEncodedList()
 
+    values = None
+    db_contents = serializer.process_bind_param(values, DB_DIALECT)
+    assert db_contents is None
+
     values = ["hello", "world"]
     db_contents = serializer.process_bind_param(values, DB_DIALECT)
     assert db_contents == "hello,world"
@@ -18,6 +22,10 @@ def test_simple_serialization():
 
 def test_simple_deserialization():
     serializer = CSVEncodedList()
+
+    db_contents = None
+    values = serializer.process_result_value(db_contents, DB_DIALECT)
+    assert values == []
 
     db_contents = "hello,world"
     values = serializer.process_result_value(db_contents, DB_DIALECT)
@@ -31,6 +39,10 @@ def test_simple_deserialization():
 def test_matrix_serialization():
     serializer = CSVEncodedList(matrix=True)
 
+    values = None
+    db_contents = serializer.process_bind_param(values, DB_DIALECT)
+    assert db_contents is None
+
     values = [["hello", "world"], ["lorem", "ipsum"]]
     db_contents = serializer.process_bind_param(values, DB_DIALECT)
     assert db_contents == "hello,world\r\nlorem,ipsum"
@@ -43,6 +55,10 @@ def test_matrix_serialization():
 def test_matrix_deserialization():
     serializer = CSVEncodedList(matrix=True)
 
+    db_contents = None
+    values = serializer.process_result_value(db_contents, DB_DIALECT)
+    assert values == []
+
     db_contents = "hello,world\r\nlorem,ipsum"
     values = serializer.process_result_value(db_contents, DB_DIALECT)
     assert values == [["hello", "world"], ["lorem", "ipsum"]]
@@ -54,6 +70,10 @@ def test_matrix_deserialization():
 
 def test_table_serialization():
     serializer = CSVEncodedTable()
+
+    values = None
+    db_contents = serializer.process_bind_param(values, DB_DIALECT)
+    assert db_contents is None
 
     values = {
         "serious project": {
@@ -79,6 +99,10 @@ def test_table_serialization():
 
 def test_table_deserialization():
     serializer = CSVEncodedTable()
+
+    db_contents = None
+    values = serializer.process_result_value(db_contents, DB_DIALECT)
+    assert values == {}
 
     db_contents = "\r\n".join([
         "serious project,to do,1,3,5",
