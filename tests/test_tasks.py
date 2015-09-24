@@ -1,48 +1,18 @@
-from flask import Flask
-
 from taskard import commands as cmd
-from taskard.models import init_database, Board, Task
+
+from .fixtures import create_sample_database
 
 
 def setup_module(module):
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
-
-    ctx = app.app_context() # TODO: use `test_request_context`?
-    ctx.push()
-    module.CONTEXT = ctx
-
-    db = init_database(app)
-    # TODO: reset database?
-
-    board = Board("dummy", ["serious project", "silly project", "misc."],
-            ["to do", "in progress", "done"])
-    db.session.add(board)
-
-    tasks = [
-        ("#1", "serious project", "to do"),
-        ("#4", "serious project", "to do"),
-        ("#3", "serious project", "to do"),
-        ("#5", "serious project", "in progress"),
-        ("#2", "serious project", "in progress"),
-        ("#6", "serious project", "done"),
-        ("#7", "silly project", "to do"),
-        ("#8", "silly project", "done")
-    ]
-    for (title, lane, state) in tasks:
-        task = Task(title, lane, state)
-        board.add_task(task)
-        db.session.add(task)
-
-    db.session.commit()
+    db, module.DB_TEARDOWN = create_sample_database()
 
 
 def teardown_module(module):
-    module.CONTEXT.pop()
+    module.DB_TEARDOWN()
 
 
 def test_task_retrieval():
-    tasks = cmd.retrieve_board_layout("dummy")
+    tasks = cmd.retrieve_board_layout("sample")
     assert sorted(tasks.keys()) == ["serious project", "silly project"]
     lane1 = tasks["serious project"]
     lane2 = tasks["silly project"]
@@ -54,7 +24,7 @@ def test_task_retrieval():
     assert _extract("title", lane2["to do"], sort=True) == ["#7"]
     assert _extract("title", lane2["done"], sort=True) == ["#8"]
 
-    tasks = cmd.retrieve_board_layout("dummy", lane="silly project")
+    tasks = cmd.retrieve_board_layout("sample", lane="silly project")
     assert sorted(tasks.keys()) == ["silly project"]
     lane = tasks["silly project"]
     assert sorted(lane.keys()) == ["done", "to do"]
