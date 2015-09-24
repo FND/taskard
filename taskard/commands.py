@@ -29,7 +29,7 @@ def create_default_board(db, title):
     return board
 
 
-def retrieve_task_matrix(board, lane=None, state=None):
+def retrieve_board_layout(board, lane=None, state=None):
     """
     returns ordered tasks categorized by lane and state for a given `Board` or
     board title, optionally limited to a specific lane and/or state
@@ -42,11 +42,11 @@ def retrieve_task_matrix(board, lane=None, state=None):
     if state:
         tasks = tasks.filter_by(state=state)
 
-    matrix = defaultdict(dict) # `{ lane: { state: [tasks] } }`
+    layout = defaultdict(dict) # `{ lane: { state: [tasks] } }`
     for lane, group in groupby(tasks.all(), lambda task: task.lane):
         for state, tasks in groupby(group, lambda task: task.state):
-            matrix[lane][state] = list(tasks)
-    return dict(matrix)
+            layout[lane][state] = list(tasks)
+    return dict(layout)
 
 
 def retrieve_board_with_tasks(title): # TODO: rename?

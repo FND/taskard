@@ -42,7 +42,7 @@ def teardown_module(module):
 
 
 def test_task_retrieval():
-    tasks = cmd.retrieve_task_matrix("dummy")
+    tasks = cmd.retrieve_board_layout("dummy")
     assert sorted(tasks.keys()) == ["serious project", "silly project"]
     lane1 = tasks["serious project"]
     lane2 = tasks["silly project"]
@@ -54,7 +54,7 @@ def test_task_retrieval():
     assert _extract("title", lane2["to do"], sort=True) == ["#7"]
     assert _extract("title", lane2["done"], sort=True) == ["#8"]
 
-    tasks = cmd.retrieve_task_matrix("dummy", lane="silly project")
+    tasks = cmd.retrieve_board_layout("dummy", lane="silly project")
     assert sorted(tasks.keys()) == ["silly project"]
     lane = tasks["silly project"]
     assert sorted(lane.keys()) == ["done", "to do"]
