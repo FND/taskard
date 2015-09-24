@@ -36,19 +36,19 @@ class CSVEncodedList(TypeDecorator):
 
         return output.getvalue().strip()
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, csv_string, dialect):
         """
         deserialize a list of values (or, with `matrix`, a list of lists of
         values) from a CSV string
         """
-        if value is None:
+        if csv_string is None:
             return []
 
         if self.matrix:
-            reader = csv.reader(StringIO(value))
+            reader = csv.reader(StringIO(csv_string))
             return list(reader)
         else:
-            reader = csv.reader([value])
+            reader = csv.reader([csv_string])
             return list(reader)[0]
 
 
@@ -71,8 +71,8 @@ class CSVEncodedTable(CSVEncodedList):
 
         return super().process_bind_param(values, dialect)
 
-    def process_result_value(self, value, dialect):
-        values = super().process_result_value(value, dialect)
+    def process_result_value(self, csv_string, dialect):
+        values = super().process_result_value(csv_string, dialect)
 
         table = defaultdict(dict)
         for items in values:
