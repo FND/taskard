@@ -53,25 +53,34 @@ class CSVEncodedList(TypeDecorator):
 
 
 class CSVEncodedTable(CSVEncodedList):
+    """
+    represents lists of values categorized by row and column as CSV string
 
-    def __init__(self, rows, columns, *args, **kwargs):
+        <row>,<column>,<item>,<item>,...
+        <row>,<column>,<item>,<item>,...
+
+    this is turned into a dictionary of the form `{ row: { column: [items] } }`
+    """
+
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, matrix=True, **kwargs)
-        self.rows = rows
-        self.columns = columns
 
     def process_bind_param(self, table, dialect):
+        """
+        serialize dictionary into a CSV string
+        """
         values = []
-        for row in self.rows:
-            for column in self.columns:
-                try:
-                    items = table[row][column]
-                    values.append([row, column] + items)
-                except KeyError:
-                    continue
+        for row, columns in table.items():
+            for column, items in columns.items():
+                items = table[row][column]
+                values.append([row, column] + items)
 
         return super().process_bind_param(values, dialect)
 
     def process_result_value(self, csv_string, dialect):
+        """
+        deserialize dictionary from a CSV string
+        """
         values = super().process_result_value(csv_string, dialect)
 
         table = defaultdict(dict)

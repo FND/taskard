@@ -53,8 +53,7 @@ def test_matrix_deserialization():
 
 
 def test_table_serialization():
-    serializer = CSVEncodedTable(["serious project", "silly project"],
-            ["to do", "in progress", "done"])
+    serializer = CSVEncodedTable()
 
     values = {
         "serious project": {
@@ -75,12 +74,11 @@ def test_table_serialization():
         "silly project,in progress,7",
         "silly project,done,8"
     ])
-    assert db_contents == expected
+    assert sorted(db_contents.splitlines()) == sorted(expected.splitlines())
 
 
 def test_table_deserialization():
-    serializer = CSVEncodedTable(["serious project", "silly project"],
-            ["to do", "in progress", "done"])
+    serializer = CSVEncodedTable()
 
     db_contents = "\r\n".join([
         "serious project,to do,1,3,5",
