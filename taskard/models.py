@@ -1,7 +1,9 @@
+from uuid import uuid4
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declared_attr
 
-from .database import CSVEncodedList
+from .database import CSVEncodedTable, CSVEncodedList
 
 
 db = SQLAlchemy()
@@ -36,6 +38,7 @@ class Board(db.Model, Record):
     title = db.Column(db.String, primary_key=True) # TODO: enforce lowercase?
     lanes = db.Column(CSVEncodedList)
     states = db.Column(CSVEncodedList)
+    layout = db.Column(CSVEncodedTable)
 
     tasks = db.relationship("Task", backref="board")
 
@@ -47,11 +50,29 @@ class Board(db.Model, Record):
         self.validate()
 
     def add_task(self, task):
-        task.board = self # XXX: hacky?
         if task.lane not in self.lanes:
             raise ValidationError("invalid lane: '%s'" % task.lane)
         if task.state not in self.states:
             raise ValidationError("invalid state: '%s'" % task.state)
+
+        # TODO: move into separate function/method
+        layout = self.layout
+        if layout is None: # board not yet persisted
+            self.layout = layout = {} # XXX: does not belong here
+        lane = task.lane
+        state = task.state
+        try:
+            lane = layout[lane]
+        except KeyError:
+            layout[lane] = lane = {}
+        try:
+            lane[state].append(task.id)
+        except KeyError:
+            lane[state] = [task.id]
+
+        task.board = self
+
+        # TODO: autosave board and task?
 
     def validate(self):
         if not self.title:
@@ -70,7 +91,7 @@ class Board(db.Model, Record):
 class Task(db.Model, Record):
     __tablename__ = "tasks"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.CHAR(32), primary_key=True)
     title = db.Column(db.String)
     lane = db.Column(db.String)
     state = db.Column(db.String)
@@ -79,7 +100,9 @@ class Task(db.Model, Record):
     board_title = db.Column(db.String, db.ForeignKey("boards.title"))
 
     def __init__(self, title, lane, state, desc=None, id=None):
-        self.id = id
+        # NB: not relying on database to assign ID in order to allow pre-commit
+        #     board layout assignment
+        self.id = uuid4().hex
         self.title = title
         self.lane = lane
         self.state = state

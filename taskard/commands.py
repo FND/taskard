@@ -29,26 +29,6 @@ def create_default_board(db, title):
     return board
 
 
-def retrieve_board_layout(board, lane=None, state=None):
-    """
-    returns ordered tasks categorized by lane and state for a given `Board` or
-    board title, optionally limited to a specific lane and/or state
-    """
-    board_title = board.title if isinstance(board, Board) else board
-
-    tasks = Task.query.filter_by(board_title=board_title)
-    if lane:
-        tasks = tasks.filter_by(lane=lane)
-    if state:
-        tasks = tasks.filter_by(state=state)
-
-    layout = defaultdict(dict) # `{ lane: { state: [tasks] } }`
-    for lane, group in groupby(tasks.all(), lambda task: task.lane):
-        for state, tasks in groupby(group, lambda task: task.state):
-            layout[lane][state] = list(tasks)
-    return dict(layout)
-
-
 def retrieve_board_with_tasks(title): # TODO: rename?
     query = Board.query.options(joinedload("tasks"))
     return query.filter_by(title=title).first()
