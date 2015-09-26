@@ -44,12 +44,7 @@ def board(board_title):
     except cmd.MissingError:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
-    task_index = {}
-    for task in board.tasks:
-        task_index[task.id] = task
-    get_task = lambda _id: task_index[_id] # TODO: encapsulate within `board.layout`
-
-    return _render("board.html", title=board.title, board=board, get_task=get_task)
+    return _render("board.html", title=board.title, board=board)
 
 
 def _render(template, **params):

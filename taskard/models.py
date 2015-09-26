@@ -1,3 +1,4 @@
+from collections import defaultdict
 from uuid import uuid4
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -83,6 +84,25 @@ class Board(db.Model, Record):
 
         if has_duplicates(self.states):
             raise ValidationError("states must be unique per board")
+
+    @property
+    def materialized_layout(self): # TODO: rename -- XXX: inefficient
+        """
+        converts task IDs to actual tasks while traversing layout
+        """
+        task_index = {}
+        for task in self.tasks:
+            task_index[task.id] = task
+
+        layout = self.layout
+        states = self.states
+        materialized = defaultdict(dict)
+        for lane in self.lanes:
+            lane_entries = layout[lane]
+            for state in states:
+                materialized[lane][state] = (task_index[task_id]
+                        for task_id in lane_entries.get(state, []))
+        return dict(materialized)
 
     def __repr__(self):
         return "<Board '%s'>" % self.title

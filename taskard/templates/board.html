@@ -5,7 +5,7 @@
 <table>
 	{# XXX: micro-optimization #}
 	{% set states = board.states %}
-	{% set layout = board.layout %}
+	{% set layout = board.materialized_layout %}
 
 	<thead>
 		<tr>
@@ -24,8 +24,8 @@
 			{% for state in states %}
 			<td>
 				<ul>
-					{% for task_id in lane_entries[state] %}
-					<li>{{ get_task(task_id) }}</li>
+					{% for task in lane_entries[state] %}
+					<li>{{ task }}</li>
 					{% endfor %}
 				</ul>
 			</td>
