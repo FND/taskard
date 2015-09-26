@@ -39,10 +39,10 @@ def boards():
 
 @app.route("/boards/<board_title>")
 def board(board_title):
-    board = cmd.retrieve_board_with_tasks(board_title)
-    if not board:
+    try:
+        board = cmd.retrieve_board_with_tasks(board_title)
+    except cmd.MissingError:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
-
     return _render("board.html", title=board.title, board=board)
 
 
