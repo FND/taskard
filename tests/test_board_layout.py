@@ -1,6 +1,7 @@
 from taskard.models import Board
 
 from .fixtures import create_sample_database
+from .util import index_tasks
 
 
 def setup_module(module):
@@ -15,9 +16,7 @@ def test_layout():
     board = Board.query.filter_by(title="sample").first()
     layout = board.layout
 
-    index = {}
-    for task in board.tasks:
-        index[task.id] = task
+    index = index_tasks(board.tasks, "id")
     task_titles = lambda ids: [index[_id].title for _id in ids]
 
     assert sorted(layout.keys()) == ["serious project", "silly project"]
