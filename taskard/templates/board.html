@@ -3,10 +3,14 @@
 {% block body %}
 <h1>{{ board.title }}</h1>
 <table>
+	{# XXX: micro-optimization #}
+	{% set states = board.states %}
+	{% set layout = board.layout %}
+
 	<thead>
 		<tr>
 			<th></th>
-			{% for state in board.states %}
+			{% for state in states %}
 			<th>{{ state }}</th>
 			{% endfor %}
 		</tr>
@@ -14,21 +18,20 @@
 	<tbody>
 		{% for lane in board.lanes %}
 		<tr>
-			<td>{{ lane }}</td>
-			{% for state in board.states %}
-			<td></td>
+			<th>{{ lane }}</th>
+
+			{% set lane_entries = layout[lane] %} {# XXX: micro-optimization #}
+			{% for state in states %}
+			<td>
+				<ul>
+					{% for task_id in lane_entries[state] %}
+					<li>{{ get_task(task_id) }}</li>
+					{% endfor %}
+				</ul>
+			</td>
 			{% endfor %}
 		</tr>
 		{% endfor %}
 	</tbody>
 </table>
-
-<ul>
-	{% for task in board.tasks %}
-	<li>
-		<h3>{{ task.title }}</h3>
-		<p>{{ task.desc }}</p>
-	</li>
-	{% endfor %}
-</ul>
 {% endblock %}
