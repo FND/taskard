@@ -1,6 +1,5 @@
 from itertools import groupby
 
-from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.exc import IntegrityError
 
@@ -45,17 +44,5 @@ def create_default_board(db, title):
     return board
 
 
-def retrieve_board_with_tasks(title): # TODO: rename?
-    query = Board.query.options(joinedload(Board.tasks))
-    board = query.filter_by(title=title).first()
-    if not board:
-        raise MissingError("board '%s' does not exist" % title)
-    return board
-
-
 class ConflictError(Exception):
-    pass
-
-
-class MissingError(Exception):
     pass
