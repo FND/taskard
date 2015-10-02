@@ -46,7 +46,7 @@ def create_default_board(db, title):
 
 
 def retrieve_board_with_tasks(title): # TODO: rename?
-    query = Board.query.options(joinedload("tasks"))
+    query = Board.query.options(joinedload(Board.tasks))
     board = query.filter_by(title=title).first()
     if not board:
         raise MissingError("board '%s' does not exist" % title)

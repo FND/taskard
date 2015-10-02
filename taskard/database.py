@@ -59,7 +59,8 @@ class CSVEncodedTable(CSVEncodedList):
         <row>,<column>,<item>,<item>,...
         <row>,<column>,<item>,<item>,...
 
-    this is turned into a dictionary of the form `{ row: { column: [items] } }`
+    this is turned into a dictionary of the form
+    `{ <row>: { <column>: [<item>, ...] } }`
     """
 
     def __init__(self, *args, **kwargs):
