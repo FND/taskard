@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, render_template, abort, redirect, url_for, request
-from sqlalchemy.orm import joinedload
 
 from . import commands as cmd
 from .models import init_database, Board, ValidationError
@@ -40,9 +39,9 @@ def boards():
 
 @app.route("/boards/<board_title>")
 def board(board_title):
-    query = Board.query.options(joinedload(Board.tasks).load_only("id", "title"))
-    board = query.filter_by(title=board_title).first()
-    if not board:
+    try:
+        board = cmd.retrieve_board(board_title, task_attribs=["id", "title"])
+    except cmd.MissingError:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
     return _render("board.html", title=board.title, board=board)
