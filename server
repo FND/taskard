@@ -7,7 +7,10 @@ from taskard.web import app
 
 settings = {}
 if sys.argv[1:2] == ["--dev"]: # XXX: crude
+    from taskard.logging import activate_sql_logging
+
     settings["debug"] = True
-    app.config["SQLALCHEMY_ECHO"] = True # XXX: should not be necessary!?
+    activate_sql_logging(app)
+
 
 app.run(**settings)

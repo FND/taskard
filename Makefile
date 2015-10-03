@@ -8,8 +8,9 @@ shell:
 			from taskard.web import app, DB; \
 			from taskard import commands as cmd; \
 			from taskard import models; \
+			from taskard import logging; \
 			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
-			app.config['SQLALCHEMY_ECHO'] = True"
+			logging.activate_sql_logging(app)"
 
 test:
 	. venv/bin/activate; py.test -v -x tests
