@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 import sys
-
-from taskard.web import app
 
 
 parser = argparse.ArgumentParser(description="launch Taskard server")
@@ -13,14 +12,16 @@ parser.add_argument("-p", "--port", nargs="?", default="5000",
         help="specify the port number to listen on (defaults to 5000)")
 args = parser.parse_args()
 
-settings = {
-    "port": args.port
-}
 if args.dev:
-    from taskard.logging import activate_sql_logging
+    # NB: must occur before application is imported
+    os.environ["TASKARD_ENV"] = "development"
 
-    settings["debug"] = True
-    activate_sql_logging(app)
+from taskard.web import app
 
-settings["port"] = int(settings["port"])
-app.run(**settings)
+if args.dev:
+    from taskard.logging import configure_sql_logging
+
+    configure_sql_logging(app)
+
+print(" * Starting up in %s mode" % app.config_mode)
+app.run(port=int(args.port))

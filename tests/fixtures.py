@@ -1,11 +1,16 @@
+import os
+
 from flask import Flask
 
+from taskard.config import configure_application
 from taskard.models import Board, Task, init_database
 
 
 def create_sample_database():
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:" # TODO: read from instance config
+    app = Flask(__name__, instance_path=os.path.abspath("."),
+            instance_relative_config=True)
+    configure_application(app)
+    assert app.config_mode == "testing" # just to be safe
 
     app_context = app.app_context() # TODO: use `test_request_context`?
     app_context.push()

@@ -1,0 +1,8 @@
+development:
+    DEBUG: true
+    SQLALCHEMY_DATABASE_URI: sqlite:///dev.sqlite
+    SQLALCHEMY_ECHO: true
+
+testing:
+    TESTING: true
+    SQLALCHEMY_DATABASE_URI: sqlite:// # in-memory

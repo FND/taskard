@@ -10,15 +10,17 @@ shell:
 			from taskard import models; \
 			from taskard import logging; \
 			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
-			logging.activate_sql_logging(app)"
+			logging.configure_sql_logging(app)"
 
 test: test-http test-unit
 
 test-unit:
-	. venv/bin/activate; py.test -v -x tests
+	. venv/bin/activate; \
+			TASKARD_ENV=testing py.test -v -x tests
 
 test-http:
-	. venv/bin/activate; python server --dev -p 5555 & \
+	. venv/bin/activate; \
+			TASKARD_ENV=testing python server -p 5555 & \
 			echo $$! > tests/server.pid
 	`which gabbi-run` localhost:5555 < tests/http.yaml; \
 			exit_code="$$?"; \
