@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 
+import argparse
 import sys
 
 from taskard.web import app
 
 
-settings = {}
-if sys.argv[1:2] == ["--dev"]: # XXX: crude
+parser = argparse.ArgumentParser(description="launch Taskard server")
+parser.add_argument("--dev", action="store_true",
+        help="activate development mode")
+parser.add_argument("-p", "--port", nargs="?", default="5000",
+        help="specify the port number to listen on (defaults to 5000)")
+args = parser.parse_args()
+
+settings = {
+    "port": args.port
+}
+if args.dev:
     from taskard.logging import activate_sql_logging
 
     settings["debug"] = True
     activate_sql_logging(app)
 
-
+settings["port"] = int(settings["port"])
 app.run(**settings)
