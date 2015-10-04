@@ -59,7 +59,7 @@ def retrieve_board(title, task_attribs=None): # TODO: rename?
             eager = eager.load_only(*task_attribs)
         query = query.options(eager)
 
-    board = query.filter_by(title=title).first()
+    board = query.get(title)
     if not board:
         raise MissingError("board '%s' does not exist" % title)
     return board

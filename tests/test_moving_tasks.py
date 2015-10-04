@@ -14,7 +14,7 @@ def teardown_module(module):
 
 
 def test_move():
-    load_board = lambda: Board.query.filter_by(title="sample").first()
+    load_board = lambda: Board.query.get("sample")
 
     board = load_board()
     layout = board.layout

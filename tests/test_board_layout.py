@@ -13,7 +13,7 @@ def teardown_module(module):
 
 
 def test_layout():
-    board = Board.query.filter_by(title="sample").first()
+    board = Board.query.get("sample")
     layout = board.layout
 
     index = index_tasks(board.tasks, "id")
