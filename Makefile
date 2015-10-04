@@ -17,7 +17,7 @@ test: test-http test-unit
 
 test-unit:
 	. venv/bin/activate; \
-			TASKARD_ENV=testing py.test -v -x tests
+			TASKARD_CONFIG=testing py.test -v -x tests
 
 test-http:
 	. venv/bin/activate; \
