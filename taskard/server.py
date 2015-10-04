@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+from taskard.config import ConfigurationError
 from taskard.logging import configure_sql_logging
 
 
@@ -22,7 +23,11 @@ def main():
     elif args.mode:
         os.environ["TASKARD_CONFIG"] = args.mode
 
-    from taskard.web import app
+    try:
+        from taskard.web import app
+    except ConfigurationError as err:
+        print("ERROR: %s" % err, file=sys.stderr)
+        return False
 
     if args.dev:
 

@@ -13,7 +13,7 @@ shell:
 			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
 			logging.configure_sql_logging(app)"
 
-test: test-http test-unit
+test: lint test-unit test-http
 
 test-unit:
 	. venv/bin/activate; \
