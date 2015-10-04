@@ -5,13 +5,16 @@ server:
 			python server --dev
 
 shell:
-	. venv/bin/activate; python -i -c "import atexit; \
-			from taskard.web import app, DB; \
-			from taskard import commands as cmd; \
-			from taskard import models; \
-			from taskard import logging; \
-			ctx = app.app_context(); ctx.push(); atexit.register(ctx.pop); \
-			logging.configure_sql_logging(app)"
+	. venv/bin/activate; \
+			TASKARD_CONFIG=development python -i -c "import atexit; \
+					from taskard.web import app, DB; \
+					from taskard import commands as cmd; \
+					from taskard import models; \
+					from taskard.logging import configure_sql_logging; \
+					ctx = app.app_context(); \
+					ctx.push(); \
+					atexit.register(ctx.pop); \
+					configure_sql_logging(app)"
 
 test: lint test-unit test-http
 
@@ -37,5 +40,6 @@ reset: clean
 clean:
 	find . -name "*.pyc" | xargs rm || true
 	find . -name "__pycache__" | xargs rm -r || true
+	rm -r .cache || true
 
 .PHONY: server shell test test-http test-unit lint reset clean
