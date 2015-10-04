@@ -1,0 +1,14 @@
+language: python
+python:
+- 3.3
+- 3.4
+- 3.5
+- pypy3
+
+install:
+- mkdir -p venv/bin
+- touch venv/bin/activate
+- pip install \
+    `python -c 'from setup import META; print(" ".join(META["extras_require"]["linting"] + META["extras_require"]["testing"] + META["install_requires"]))'`
+
+script: make test
