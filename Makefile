@@ -1,7 +1,8 @@
 export PATH := ./venv/bin:$(PATH)
 
 server:
-	. venv/bin/activate; python server --dev
+	. venv/bin/activate; \
+			python server --dev
 
 shell:
 	. venv/bin/activate; python -i -c "import atexit; \
@@ -20,7 +21,7 @@ test-unit:
 
 test-http:
 	. venv/bin/activate; \
-			TASKARD_ENV=testing python -m taskard.server -p 5555 & \
+			python -m taskard.server --mode testing -p 5555 & \
 			echo $$! > tests/server.pid
 	`which gabbi-run` localhost:5555 < tests/http.yaml; \
 			exit_code="$$?"; \
