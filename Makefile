@@ -20,7 +20,7 @@ test-unit:
 
 test-http:
 	. venv/bin/activate; \
-			TASKARD_ENV=testing python server -p 5555 & \
+			TASKARD_ENV=testing python -m taskard.server -p 5555 & \
 			echo $$! > tests/server.pid
 	`which gabbi-run` localhost:5555 < tests/http.yaml; \
 			exit_code="$$?"; \
