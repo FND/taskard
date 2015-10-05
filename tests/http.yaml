@@ -23,7 +23,20 @@ tests:
 
   status: 400
 
-- name: retrieve board
+- name: retrieve individual board
   GET: /boards/dummy
 
   status: 200
+  response_html:
+      .tasks: 3 # lanes * states
+      .tasks > li: 1
+
+- name: retrieve individual task
+  GET: $RESPONSE_HTML[".tasks a@href"]
+
+  status: 200
+
+- name: attempt to retrieve bogus task
+  GET: /boards/dummy/666
+
+  status: 404

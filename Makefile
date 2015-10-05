@@ -25,8 +25,8 @@ test-unit:
 test-http:
 	. venv/bin/activate; \
 			python -m taskard.server --mode testing -p 5555 & \
-			echo $$! > tests/server.pid
-	`which gabbi-run` localhost:5555 < tests/http.yaml; \
+			echo $$! > tests/server.pid; \
+			gabbi-run -r gabbi_html localhost:5555 < tests/http.yaml; \
 			exit_code="$$?"; \
 			kill `cat tests/server.pid` && rm tests/server.pid; \
 			[ "$$exit_code" -eq 0 ] || false

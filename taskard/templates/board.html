@@ -23,9 +23,14 @@
 			{% set lane_entries = layout[lane] %} {# XXX: micro-optimization #}
 			{% for state in states %}
 			<td>
-				<ul>
+				<ul class="tasks">
 					{% for task in lane_entries[state] %}
-					<li>{{ task.title }}</li>
+					<li>
+						<a href="{{ url_for("task", task_id=task.id,
+								board_title=task.board_title) }}">
+							{{ task.title }}
+						</a>
+					</li>
 					{% endfor %}
 				</ul>
 			</td>

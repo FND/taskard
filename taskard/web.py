@@ -4,7 +4,7 @@ from flask import Flask, render_template, abort, redirect, url_for, request
 
 from . import commands as cmd
 from .config import configure_application
-from .models import init_database, Board, ValidationError
+from .models import init_database, Board, Task, ValidationError
 
 
 app = Flask(__name__, instance_path=os.path.abspath("."),
@@ -40,11 +40,21 @@ def boards():
 @app.route("/boards/<board_title>")
 def board(board_title):
     try:
-        board = cmd.retrieve_board(board_title, task_attribs=["id", "title"])
+        board = cmd.retrieve_board(board_title,
+                task_attribs=["id", "title", "board_title"])
     except cmd.MissingError:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
     return _render("board.html", title=board.title, board=board)
+
+
+@app.route("/boards/<board_title>/<task_id>")
+def task(board_title, task_id):
+    # TODO: encapsulate database query within command
+    task = Task.query.filter_by(id=task_id, board_title=board_title).first()
+    if not task:
+        abort(404, "task '%s' does not exist or access is restricted" % task_id)
+    return "" # TODO
 
 
 def _render(template, **params):
