@@ -2,11 +2,30 @@
 
 {% block body %}
 <form action="{{ url_for("boards") }}" method="post">
-	<label>
-		board name:
-		<input type="text" name="board-title">
-	</label>
+	<fieldset>
+		<legend>create board</legend>
 
-	<button type="submit">create board</button>
+		<label>
+			board name:
+			<input type="text" name="board-title">
+		</label>
+
+		<button type="submit">create</button>
+	</fieldset>
 </form>
+
+<h1>Boards Overview</h1>
+{% if boards %}
+<ul class="boards">
+	{% for board in boards %}
+	<li>
+		<a href="{{ url_for("board", board_title=board.title) }}">
+			{{ board.title }}
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+{% else %}
+<p>no boards exist yet</p>
+{% endif %}
 {% endblock %}

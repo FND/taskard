@@ -5,6 +5,13 @@ tests:
       count: 10
       delay: 0.1
 
+- name: ensure board listing starts out empty
+  GET: /
+
+  status: 200
+  response_html:
+      .boards li: 0
+
 - name: create new board
   POST: /boards
   request_headers:
@@ -14,6 +21,14 @@ tests:
   status: 302
   response_headers:
       Location: $SCHEME://$NETLOC/boards/dummy
+
+- name: ensure newly created board is listed
+  GET: /
+
+  status: 200
+  response_html:
+      .boards li a: dummy
+      .boards li a@href: /boards/dummy
 
 - name: attempt to re-create existing board
   POST: /boards

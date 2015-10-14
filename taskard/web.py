@@ -16,25 +16,22 @@ DB = init_database(app)
 
 @app.route("/")
 def frontpage():
-    return _render("frontpage.html")
+    return _render("frontpage.html", boards=Board.query.all())
 
 
-@app.route("/boards", methods=["GET", "POST"])
+@app.route("/boards", methods=["POST"])
 def boards():
-    if request.method == "POST":
-        title = request.form.get("board-title")
-        try:
-            board = cmd.create_default_board(DB, title)
-        except ValidationError as err:
-            abort(400, err) # TODO: friendly error
-        except cmd.ConflictError as err:
-            # XXX: revealing existence here is inconsistent with intentionally
-            #      unspecific 404 for indivdual boards
-            abort(400, err)
+    title = request.form.get("board-title")
+    try:
+        board = cmd.create_default_board(DB, title)
+    except ValidationError as err:
+        abort(400, err) # TODO: friendly error
+    except cmd.ConflictError as err:
+        # XXX: revealing existence here is inconsistent with intentionally
+        #      unspecific 404 for indivdual boards
+        abort(400, err)
 
-        return redirect(url_for("board", board_title=board.title))
-
-    return _render("boards.html", title="Boards Overview", boards=Board.query.all())
+    return redirect(url_for("board", board_title=board.title))
 
 
 @app.route("/boards/<board_title>")
