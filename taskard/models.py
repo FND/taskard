@@ -2,6 +2,7 @@ from collections import defaultdict
 from uuid import uuid4
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import load_only
 from sqlalchemy.ext.declarative import declared_attr
 
 from .database import CSVEncodedTable, CSVEncodedList
@@ -31,6 +32,10 @@ class Record:
     def updated_at(cls):
         return db.Column(db.DateTime, server_default=db.func.now(),
                 onupdate=db.func.now())
+
+    @classmethod
+    def load(cls, *columns):
+        return cls.query.options(load_only(*columns))
 
 
 class Board(db.Model, Record):
