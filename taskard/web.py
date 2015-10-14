@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template, abort, redirect, url_for, request
+from sqlalchemy.orm import load_only
 
 from . import commands as cmd
 from .config import configure_application
@@ -16,7 +17,9 @@ DB = init_database(app)
 
 @app.route("/")
 def frontpage():
-    return _render("frontpage.html", boards=Board.query.all())
+    # TODO: encapsulate database query within command
+    boards = Board.query.options(load_only("title"))
+    return _render("frontpage.html", boards=boards)
 
 
 @app.route("/boards", methods=["POST"])
