@@ -16,7 +16,6 @@ DB = init_database(app)
 
 @app.route("/")
 def frontpage():
-    # TODO: encapsulate database query within command
     boards = Board.load("title")
     return _render("frontpage.html", boards=boards)
 
@@ -38,10 +37,10 @@ def boards():
 
 @app.route("/boards/<board_title>")
 def board(board_title):
-    try:
-        board = cmd.retrieve_board(board_title,
-                task_attribs=["id", "title", "board_title"])
-    except cmd.MissingError:
+    board = Board.load({
+        Board.tasks: ["id", "title", "board_title"]
+    }).get(board_title)
+    if not board:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
     return _render("board.html", title=board.title, board=board)
@@ -49,7 +48,6 @@ def board(board_title):
 
 @app.route("/boards/<board_title>/<task_id>")
 def task(board_title, task_id):
-    # TODO: encapsulate database query within command
     task = Task.query.filter_by(id=task_id, board_title=board_title).first()
     if not task:
         abort(404, "task '%s' does not exist or access is restricted" % task_id)

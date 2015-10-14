@@ -2,7 +2,7 @@ from collections import defaultdict
 from uuid import uuid4
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import load_only
+from sqlalchemy.orm import joinedload, load_only
 from sqlalchemy.ext.declarative import declared_attr
 
 from .database import CSVEncodedTable, CSVEncodedList
@@ -34,8 +34,41 @@ class Record:
                 onupdate=db.func.now())
 
     @classmethod
-    def load(cls, *columns):
-        return cls.query.options(load_only(*columns))
+    def load(cls, *args):
+        """
+        retrieves a record, optionally including associated records, while
+        limiting retrieval to a set of columns
+
+        if the last argument is a dictionary, it is considered an
+        association-columns mapping
+
+        columns to be retrieved are expressed as sequences of column names; if
+        that sequence is empty, all columns will be retrieved
+
+            Product.load("name", "price", { Product.vendors: ["address"] })
+
+        this would retrieve products' name and price along with associated
+        vendors, for whom only the address is retrieved
+        """
+        last = args[-1]
+        if isinstance(last, dict):
+            columns = args[:-1]
+            relationships = last
+        else:
+            columns = args
+            relationships = {}
+
+        query = cls.query
+        if len(columns):
+            query = query.options(load_only(*columns))
+
+        for rel, cols in relationships.items():
+            eager = joinedload(rel)
+            if cols is not True:
+                eager = eager.load_only(*cols)
+            query = query.options(eager)
+
+        return query
 
 
 class Board(db.Model, Record):
