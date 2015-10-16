@@ -1,0 +1,25 @@
+<form action="{{ url_for("board", board_title=board.title) }}" method="post">
+	<fieldset>
+		<legend>Lanes</legend>
+		<ol class="lanes">
+			{% for lane in board.lanes %}
+			<li>
+				<input type="text" name="lane" value="{{ lane }}">
+			</li>
+			{% endfor %}
+		</ol>
+	</fieldset>
+
+	<fieldset>
+		<legend>States</legend>
+		<ol class="states">
+			{% for state in board.states %}
+			<li>
+				<input type="text" name="state" value="{{ state }}">
+			</li>
+			{% endfor %}
+		</ol>
+	</fieldset>
+
+	<button type="submit">save changes</button>
+</form>

@@ -46,6 +46,31 @@ tests:
       .tasks: 3 # lanes * states
       .tasks > li: 1
 
+- name: edit board
+  GET: /boards/dummy/edit
+
+  status: 200
+  response_html:
+      .lanes input: 1
+      .states input: 3
+
+- name: update board's lanes and states
+  POST: /boards/dummy
+  request_headers:
+      Content-Type: application/x-www-form-urlencoded
+  data: lane=sample%20project&state=to%20do&state=done
+
+  status: 302
+  response_headers:
+      Location: $SCHEME://$NETLOC/boards/dummy
+
+- name: retrieve updated board
+  GET: /boards/dummy
+
+  status: 200
+  response_html:
+      .tasks: 2 # lanes * states
+
 - name: retrieve individual task
   GET: $RESPONSE_HTML[".tasks a@href"]
 

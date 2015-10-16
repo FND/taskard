@@ -35,8 +35,16 @@ def boards():
     return redirect(url_for("board", board_title=board.title))
 
 
-@app.route("/boards/<board_title>")
-def board(board_title):
+@app.route("/boards/<board_title>", methods=["GET", "POST"])
+def board(board_title, edit_mode=False):
+    if request.method == "POST": # TODO: support PATCH?
+        board = Board.load("title", "lanes", "states").get(board_title)
+        board.lanes = request.form.getlist("lane")
+        board.states = request.form.getlist("state")
+        # FIXME: ensure that there are no orphan tasks in obsolete lanes/states
+        DB.session.commit()
+        return redirect(url_for("board", board_title=board.title))
+
     board = Board.load({
         Board.tasks: ["id", "title", "board_title"]
     }).get(board_title)
@@ -44,6 +52,15 @@ def board(board_title):
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
     return _render("board.html", title=board.title, board=board)
+
+
+@app.route("/boards/<board_title>/edit") # XXX: namespace hogging (cf. `task`)
+def edit_board(board_title):
+    board = Board.load("lanes", "states").get(board_title)
+    if not board:
+        abort(404, "board '%s' does not exist or access is restricted" % board_title)
+
+    return _render("edit_board.html", title=board.title, board=board)
 
 
 @app.route("/boards/<board_title>/<task_id>")
