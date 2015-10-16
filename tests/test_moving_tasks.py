@@ -14,9 +14,7 @@ def teardown_module(module):
 
 
 def test_move():
-    load_board = lambda: Board.query.get("sample")
-
-    board = load_board()
+    board = _load_board()
     layout = board.layout
 
     index = index_tasks(board.tasks, "id")
@@ -27,13 +25,18 @@ def test_move():
     task = next(task for task in board.tasks if task.title == "#4")
 
     cmd.move_task(DB, task, 0)
-    layout = load_board().layout
+    layout = _load_board().layout
     assert task_titles(layout["serious project"]["to do"]) == ["#4", "#1", "#3"]
 
     cmd.move_task(DB, task, 2)
-    layout = load_board().layout
+    layout = _load_board().layout
     assert task_titles(layout["serious project"]["to do"]) == ["#1", "#3", "#4"]
 
     cmd.move_task(DB, task, 1)
-    layout = load_board().layout
+    layout = _load_board().layout
     assert task_titles(layout["serious project"]["to do"]) == ["#1", "#4", "#3"]
+
+
+def _load_board():
+    DB.session.expire_all() # avoids caching
+    return Board.query.get("sample")

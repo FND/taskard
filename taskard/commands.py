@@ -18,7 +18,6 @@ def move_task(db, task, index):
     peers.insert(index, _id)
 
     flag_modified(board, "layout")
-    db.session.add(board)
     db.session.commit()
 
 
