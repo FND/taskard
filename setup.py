@@ -8,6 +8,7 @@ META = {
     "author": "FND",
     "install_requires": ["Flask", "Flask-SQLAlchemy"],
     "extras_require": {
+        "development": ["colorama"],
         "testing": ["gabbi", "gabbi-html", "pytest"],
         "linting": ["pep8"]
     }

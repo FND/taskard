@@ -30,8 +30,7 @@ def main():
         return False
 
     if args.dev:
-
-        configure_sql_logging(app)
+        configure_sql_logging()
 
     print(" * Starting up in %s mode" % app.config_mode)
     app.run(port=int(args.port))

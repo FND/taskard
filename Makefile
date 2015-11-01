@@ -14,7 +14,7 @@ shell:
 					ctx = app.app_context(); \
 					ctx.push(); \
 					atexit.register(ctx.pop); \
-					configure_sql_logging(app)"
+					configure_sql_logging()"
 
 test: lint test-unit test-http
 
