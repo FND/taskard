@@ -96,6 +96,21 @@ def test_table_serialization():
     ])
     assert sorted(db_contents.splitlines()) == sorted(expected.splitlines())
 
+    values = {
+        "serious project": {
+            "to do": [1, 3, 5],
+            "done": [2, 4]
+        },
+        "silly project": {}
+    }
+    db_contents = serializer.process_bind_param(values, DB_DIALECT)
+    expected = "\r\n".join([
+        "serious project,to do,1,3,5",
+        "serious project,done,2,4",
+        "silly project"
+    ])
+    assert sorted(db_contents.splitlines()) == sorted(expected.splitlines())
+
 
 def test_table_deserialization():
     serializer = CSVEncodedTable()
@@ -106,7 +121,7 @@ def test_table_deserialization():
 
     db_contents = "\r\n".join([
         "serious project,to do,1,3,5",
-        "serious project,done,2,4",
+        "serious project,done",
         "silly project,to do,6",
         "silly project,in progress,7",
         "silly project,done,8"
@@ -115,11 +130,25 @@ def test_table_deserialization():
     assert values == {
         "serious project": {
             "to do": ["1", "3", "5"],
-            "done": ["2", "4"]
+            "done": []
         },
         "silly project": {
             "to do": ["6"],
             "in progress": ["7"],
             "done": ["8"]
         }
+    }
+
+    db_contents = "\r\n".join([
+        "serious project,to do,1,3,5",
+        "serious project,done",
+        "silly project"
+    ])
+    values = serializer.process_result_value(db_contents, DB_DIALECT)
+    assert values == {
+        "serious project": {
+            "to do": ["1", "3", "5"],
+            "done": []
+        },
+        "silly project": {}
     }

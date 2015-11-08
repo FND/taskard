@@ -75,6 +75,10 @@ class CSVEncodedTable(CSVEncodedList):
 
         values = []
         for row, columns in table.items():
+            if not len(columns):
+                values.append([row])
+                continue
+
             for column, items in columns.items():
                 items = table[row][column]
                 values.append([row, column] + items)
@@ -93,7 +97,10 @@ class CSVEncodedTable(CSVEncodedList):
         table = defaultdict(dict)
         for items in values:
             row = items.pop(0)
-            column = items.pop(0)
-            table[row][column] = items
+            try:
+                column = items.pop(0)
+                table[row][column] = items
+            except IndexError:
+                table[row] = {}
 
         return dict(table)
