@@ -109,6 +109,7 @@ class Board(db.Model, Record):
             lane[state].append(task.id)
         except KeyError:
             lane[state] = [task.id]
+        flag_modified(self, "layout")
 
         task.board = self
 
