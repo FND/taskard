@@ -40,5 +40,17 @@
 	</tbody>
 </table>
 
+<h3>Orphaned Tasks</h3>
+<ul class="tasks">
+	{% for task in board.orphaned_tasks %}
+	<li>
+		<a href="{{ url_for("task", task_id=task.id,
+				board_title=task.board_title) }}">
+			{{ task.title }}
+		</a>
+	</li>
+	{% endfor %}
+</ul>
+
 <a href="{{ url_for("edit_board", board_title=board.title) }}">edit</a>
 {% endblock %}

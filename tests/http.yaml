@@ -43,8 +43,8 @@ tests:
 
   status: 200
   response_html:
-      .tasks: 3 # lanes * states
-      .tasks > li: 1
+      table .tasks: 3 # lanes * states
+      table .tasks > li: 1
 
 - name: edit board
   GET: /boards/dummy/edit
@@ -69,7 +69,7 @@ tests:
 
   status: 200
   response_html:
-      .tasks: 2 # lanes * states
+      table .tasks: 2 # lanes * states
 
 - name: retrieve individual task
   GET: $RESPONSE_HTML[".tasks a@href"]
