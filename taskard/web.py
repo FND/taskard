@@ -39,7 +39,7 @@ def boards():
 def board(board_title, edit_mode=False):
     if request.method == "POST":
         form = request.form
-        board = Board.load("title", "lanes", "states").get(board_title)
+        board = Board.load("title", "lanes", "states", "layout").get(board_title)
 
         _update_board_axes(board, form.getlist("lane"), form.getlist("state"))
 

@@ -124,7 +124,14 @@ class Board(db.Model, Record):
     def remove_state(self, state):
         self.states.remove(state)
         flag_modified(self, "states")
-        # FIXME: detect orphaned tasks
+
+        modified = False
+        for lane, states in self.layout.items():
+            existed = states.pop(state, None)
+            if existed:
+                modified = True
+        if modified:
+            flag_modified(self, "layout")
 
     def add_lane(self, lane):
         dupe = lane in self.lanes
@@ -141,7 +148,9 @@ class Board(db.Model, Record):
     def remove_lane(self, lane):
         self.lanes.remove(lane)
         flag_modified(self, "lanes")
-        # FIXME: detect orphaned tasks
+
+        self.layout.pop(lane)
+        flag_modified(self, "layout")
 
     def validate(self):
         if not self.title:
