@@ -5,16 +5,12 @@ server:
 			python server --dev
 
 shell:
+	mkdir -p tmp
+	rm tmp/shell.py || true
+	cp "$$PYTHONSTARTUP" tmp/shell.py || true
+	{ echo; echo "# ----"; echo; cat shell.py; } >> tmp/shell.py
 	. venv/bin/activate; \
-			TASKARD_CONFIG=development python -i -c "import atexit; \
-					from taskard.web import app, DB; \
-					from taskard import commands as cmd; \
-					from taskard import models; \
-					from taskard.logging import configure_sql_logging; \
-					ctx = app.app_context(); \
-					ctx.push(); \
-					atexit.register(ctx.pop); \
-					configure_sql_logging()"
+			PYTHONSTARTUP=tmp/shell.py TASKARD_CONFIG=development python
 
 test: lint test-unit test-http
 
