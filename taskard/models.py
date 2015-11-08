@@ -82,6 +82,7 @@ class Board(db.Model, Record):
     layout = db.Column(CSVEncodedTable)
 
     tasks = db.relationship("Task", backref="board")
+    tasks_query = db.relationship("Task", lazy="dynamic")
 
     def __init__(self, title, lanes, states):
         self.title = title
@@ -165,11 +166,9 @@ class Board(db.Model, Record):
 
     @property
     def orphaned_tasks(self):
-        # TODO: use dynamic relationship instead of filtering manually
-        query = Task.query.filter_by(board_title=self.title)
         filters = or_(~Task.lane.in_(self.lanes),
                 ~Task.state.in_(self.states))
-        return query.filter(filters).all()
+        return self.tasks_query.filter(filters).all()
 
     @property
     def materialized_layout(self): # TODO: rename -- XXX: inefficient
