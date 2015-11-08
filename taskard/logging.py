@@ -11,14 +11,14 @@ def configure_sql_logging():
 
 class SQLLogger(logging.StreamHandler):
 
-    def __init__(self, *args, colors, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, stream=None, colors=()):
+        super().__init__(stream)
         self.colors = colors
         self.colorizer = Colorizer(self.stream, colors[0])
 
-    def emit(self, *args, **kwargs):
+    def emit(self, record):
         with self.colorizer:
-            super().emit(*args, **kwargs)
+            super().emit(record)
 
         # cycle colors
         if self.colorizer.active:
