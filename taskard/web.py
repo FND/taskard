@@ -39,27 +39,22 @@ def boards():
 def board(board_title, edit_mode=False):
     if request.method == "POST":
         form = request.form
+        board = Board.load("title", "lanes", "states").get(board_title)
+
+        _update_board_axes(board, form.getlist("lane"), form.getlist("state"))
 
         edit = True # TODO: edits should not be persisted until saved explicitly
         if "add-lane" in form:
-            board = Board.load("lanes").get(board_title)
             board.add_lane("")
         elif "add-state" in form:
-            board = Board.load("states").get(board_title)
             board.add_state("")
         elif form.get("rm-lane") is not None:
-            board = Board.load("lanes").get(board_title)
             board.remove_lane(form["rm-lane"])
         elif form.get("rm-state") is not None:
-            board = Board.load("states").get(board_title)
             board.remove_state(form["rm-state"])
-        else: # update entire board -- TODO: conflict handling for concurrent edits
-            board = Board.load("title", "lanes", "states").get(board_title)
-            board.lanes = form.getlist("lane")
-            board.states = form.getlist("state")
+        else:
             edit = False
 
-        # FIXME: ensure that there are no orphan tasks in obsolete lanes/states
         DB.session.commit()
         endpoint = "edit_board" if edit else "board"
         return redirect(url_for(endpoint, board_title=board_title))
@@ -97,3 +92,17 @@ def _render(template, **params):
         params["title"] = "Taskard"
 
     return render_template(template, **params)
+
+
+def _update_board_axes(board, lanes, states):
+    lanes, states = set(lanes), set(states)
+    _update_list(set(board.lanes), lanes, board.add_lane, board.remove_lane)
+    _update_list(set(board.states), states, board.add_state, board.remove_state)
+
+
+def _update_list(before, after, add, remove):
+    # FIXME: does not support renames (retaining associated tasks)
+    for item in before - after:
+        remove(item)
+    for item in after - before:
+        add(item)
