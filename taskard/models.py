@@ -163,6 +163,12 @@ class Board(db.Model, Record):
             raise ValidationError("states must be unique per board")
 
     @property
+    def orphaned_tasks(self):
+        lanes, states = self.lanes, self.states
+        return [task for task in self.tasks
+                if task.lane not in lanes or task.state not in states]
+
+    @property
     def materialized_layout(self): # TODO: rename -- XXX: inefficient
         """
         converts task IDs to actual tasks while traversing layout

@@ -60,6 +60,7 @@ def test_state_modifications():
     lane2 = layout["silly project"]
     assert sorted(lane1.keys()) == ["done", "in progress", "to do"]
     assert sorted(lane2.keys()) == ["done", "to do"]
+    assert [t.title for t in board.orphaned_tasks] == ["#9"]
 
 
 def test_lane_modifications():
@@ -82,11 +83,13 @@ def test_lane_modifications():
     DB.session.commit()
     board, layout = _load_board()
     assert layout.get("future project") is None
+    assert [t.title for t in board.orphaned_tasks] == ["#9", "#10"]
 
     board.remove_lane("silly project")
     DB.session.commit()
     board, layout = _load_board()
     assert layout.get("silly project") is None
+    assert [t.title for t in board.orphaned_tasks] == ["#7", "#8", "#9", "#10"]
 
 
 def _load_board():
