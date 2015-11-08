@@ -2,6 +2,7 @@ from collections import defaultdict
 from uuid import uuid4
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from sqlalchemy.orm import joinedload, load_only
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.declarative import declared_attr
@@ -164,9 +165,11 @@ class Board(db.Model, Record):
 
     @property
     def orphaned_tasks(self):
-        lanes, states = self.lanes, self.states
-        return [task for task in self.tasks
-                if task.lane not in lanes or task.state not in states]
+        # TODO: use dynamic relationship instead of filtering manually
+        query = Task.query.filter_by(board_title=self.title)
+        filters = or_(~Task.lane.in_(self.lanes),
+                ~Task.state.in_(self.states))
+        return query.filter(filters).all()
 
     @property
     def materialized_layout(self): # TODO: rename -- XXX: inefficient
