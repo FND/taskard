@@ -40,7 +40,7 @@ def board(board_title, edit_mode=False):
     if request.method == "POST":
         form = request.form
 
-        edit = True
+        edit = True # TODO: edits should not be persisted until saved explicitly
         if "add-lane" in form:
             board = Board.load("lanes").get(board_title)
             board.add_lane("")
@@ -53,7 +53,7 @@ def board(board_title, edit_mode=False):
         elif form.get("rm-state") is not None:
             board = Board.load("states").get(board_title)
             board.remove_state(form["rm-state"])
-        else: # update entire board
+        else: # update entire board -- TODO: conflict handling for concurrent edits
             board = Board.load("title", "lanes", "states").get(board_title)
             board.lanes = form.getlist("lane")
             board.states = form.getlist("state")
@@ -79,7 +79,7 @@ def edit_board(board_title):
     if not board:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
-    return _render("edit_board.html", title=board.title, board=board)
+    return _render("edit_board.html", title="%s (edit)" % board.title, board=board)
 
 
 @app.route("/boards/<board_title>/<task_id>")

@@ -1,3 +1,6 @@
+{% extends "layout.html" %}
+
+{% block body %}
 <form action="{{ url_for("board", board_title=board.title) }}" method="post">
 	<fieldset>
 		<legend>Lanes</legend>
@@ -27,3 +30,4 @@
 
 	<button type="submit">save changes</button>
 </form>
+{% endblock %}

@@ -166,8 +166,9 @@ class Board(db.Model, Record):
         materialized = defaultdict(dict)
         for lane in self.lanes:
             lane_entries = layout[lane]
+            tasks = materialized[lane]
             for state in states:
-                materialized[lane][state] = (task_index[task_id]
+                tasks[state] = (task_index[task_id]
                         for task_id in lane_entries.get(state, []))
         return dict(materialized)
 
