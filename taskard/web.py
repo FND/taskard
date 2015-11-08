@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask, render_template, abort, redirect, url_for, request
+from sqlalchemy.orm.attributes import flag_modified
 
 from . import commands as cmd
 from .config import configure_application
@@ -37,13 +38,36 @@ def boards():
 
 @app.route("/boards/<board_title>", methods=["GET", "POST"])
 def board(board_title, edit_mode=False):
-    if request.method == "POST": # TODO: support PATCH?
-        board = Board.load("title", "lanes", "states").get(board_title)
-        board.lanes = request.form.getlist("lane")
-        board.states = request.form.getlist("state")
+    if request.method == "POST":
+        form = request.form
+
+        edit = True
+        if "add-lane" in form:
+            board = Board.load("lanes").get(board_title)
+            board.lanes.append("")
+            flag_modified(board, "lanes")
+        elif "add-state" in form:
+            board = Board.load("states").get(board_title)
+            board.states.append("")
+            flag_modified(board, "states")
+        elif form.get("rm-lane") is not None:
+            board = Board.load("lanes").get(board_title)
+            board.lanes.remove(form["rm-lane"])
+            flag_modified(board, "lanes")
+        elif form.get("rm-state") is not None:
+            board = Board.load("states").get(board_title)
+            board.states.remove(form["rm-state"])
+            flag_modified(board, "states")
+        else: # update entire board
+            board = Board.load("title", "lanes", "states").get(board_title)
+            board.lanes = form.getlist("lane")
+            board.states = form.getlist("state")
+            edit = False
+
         # FIXME: ensure that there are no orphan tasks in obsolete lanes/states
         DB.session.commit()
-        return redirect(url_for("board", board_title=board.title))
+        endpoint = "edit_board" if edit else "board"
+        return redirect(url_for(endpoint, board_title=board_title))
 
     board = Board.load({
         Board.tasks: ["id", "title", "board_title"]

@@ -5,9 +5,11 @@
 			{% for lane in board.lanes %}
 			<li>
 				<input type="text" name="lane" value="{{ lane }}">
+				<button type="submit" name="rm-lane" value="{{ lane }}">remove</button>
 			</li>
 			{% endfor %}
 		</ol>
+		<button type="submit" name="add-lane">add</button>
 	</fieldset>
 
 	<fieldset>
@@ -16,9 +18,11 @@
 			{% for state in board.states %}
 			<li>
 				<input type="text" name="state" value="{{ state }}">
+				<button type="submit" name="rm-state" value="{{ state }}">remove</button>
 			</li>
 			{% endfor %}
 		</ol>
+			<button type="submit" name="add-state">add</button>
 	</fieldset>
 
 	<button type="submit">save changes</button>
