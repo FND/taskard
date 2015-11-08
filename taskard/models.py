@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.ext.declarative import declared_attr
 
 from .database import CSVEncodedTable, CSVEncodedList
@@ -111,7 +112,35 @@ class Board(db.Model, Record):
 
         task.board = self
 
-        # TODO: autosave board and task?
+    def add_state(self, state):
+        dupe = state in self.states
+
+        self.states.append(state)
+        flag_modified(self, "states")
+
+        return dupe
+
+    def remove_state(self, state):
+        self.states.remove(state)
+        flag_modified(self, "states")
+        # FIXME: detect orphaned tasks
+
+    def add_lane(self, lane):
+        dupe = lane in self.lanes
+
+        self.lanes.append(lane)
+        flag_modified(self, "lanes")
+
+        if not dupe:
+            self.layout[lane] = {}
+            flag_modified(self, "layout")
+
+        return dupe
+
+    def remove_lane(self, lane):
+        self.lanes.remove(lane)
+        flag_modified(self, "lanes")
+        # FIXME: detect orphaned tasks
 
     def validate(self):
         if not self.title:
@@ -136,10 +165,7 @@ class Board(db.Model, Record):
         states = self.states
         materialized = defaultdict(dict)
         for lane in self.lanes:
-            try:
-                lane_entries = layout[lane]
-            except KeyError: # newly added lane
-                lane_entries = layout[lane] = {}
+            lane_entries = layout[lane]
             for state in states:
                 materialized[lane][state] = (task_index[task_id]
                         for task_id in lane_entries.get(state, []))

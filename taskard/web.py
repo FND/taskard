@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, render_template, abort, redirect, url_for, request
-from sqlalchemy.orm.attributes import flag_modified
 
 from . import commands as cmd
 from .config import configure_application
@@ -44,20 +43,16 @@ def board(board_title, edit_mode=False):
         edit = True
         if "add-lane" in form:
             board = Board.load("lanes").get(board_title)
-            board.lanes.append("")
-            flag_modified(board, "lanes")
+            board.add_lane("")
         elif "add-state" in form:
             board = Board.load("states").get(board_title)
-            board.states.append("")
-            flag_modified(board, "states")
+            board.add_state("")
         elif form.get("rm-lane") is not None:
             board = Board.load("lanes").get(board_title)
-            board.lanes.remove(form["rm-lane"])
-            flag_modified(board, "lanes")
+            board.remove_lane(form["rm-lane"])
         elif form.get("rm-state") is not None:
             board = Board.load("states").get(board_title)
-            board.states.remove(form["rm-state"])
-            flag_modified(board, "states")
+            board.remove_state(form["rm-state"])
         else: # update entire board
             board = Board.load("title", "lanes", "states").get(board_title)
             board.lanes = form.getlist("lane")
