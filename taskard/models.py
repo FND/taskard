@@ -118,6 +118,23 @@ class Board(db.Model, Record):
     def add_state(self, state):
         dupe = state in self.states
 
+        if not dupe: # re-associate orphans
+            lanes = Task.lane.in_(self.lanes)
+            orphans = self.tasks_query.filter(lanes).filter_by(state=state).all()
+
+            for orphan in orphans:
+                try:
+                    tasks = self.layout[orphan.lane]
+                except KeyError:
+                    self.layout[orphan.lane] = tasks = {}
+                try:
+                    tasks[orphan.state].append(orphan.id)
+                except KeyError:
+                    tasks[orphan.state] = [orphan.id]
+
+            if len(orphans):
+                flag_modified(self, "layout")
+
         self.states.append(state)
         flag_modified(self, "states")
 
@@ -138,12 +155,20 @@ class Board(db.Model, Record):
     def add_lane(self, lane):
         dupe = lane in self.lanes
 
+        if not dupe:
+            lane_entries = defaultdict(list)
+
+            # re-associate orphans
+            states = Task.state.in_(self.states)
+            orphans = self.tasks_query.filter(states).filter_by(lane=lane).all()
+            for orphan in orphans:
+                lane_entries[orphan.state].append(orphan.id)
+
+            self.layout[lane] = dict(lane_entries)
+            flag_modified(self, "layout")
+
         self.lanes.append(lane)
         flag_modified(self, "lanes")
-
-        if not dupe:
-            self.layout[lane] = {}
-            flag_modified(self, "layout")
 
         return dupe
 

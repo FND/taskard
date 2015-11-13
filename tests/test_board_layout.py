@@ -62,6 +62,14 @@ def test_state_modifications():
     assert sorted(lane2.keys()) == ["done", "to do"]
     assert [t.title for t in board.orphaned_tasks] == ["#9"]
 
+    index = index_tasks(board.tasks, "id")
+    task_titles = lambda ids: [index[_id].title for _id in ids]
+    board.add_state("review")
+    DB.session.commit()
+    board, layout = _load_board()
+    assert len(board.orphaned_tasks) == 0
+    assert task_titles(layout["silly project"]["review"]) == ["#9"]
+
 
 def test_lane_modifications():
     board, layout = _load_board()
@@ -83,13 +91,24 @@ def test_lane_modifications():
     DB.session.commit()
     board, layout = _load_board()
     assert layout.get("future project") is None
-    assert [t.title for t in board.orphaned_tasks] == ["#9", "#10"]
+    assert [t.title for t in board.orphaned_tasks] == ["#10"]
 
     board.remove_lane("silly project")
     DB.session.commit()
     board, layout = _load_board()
     assert layout.get("silly project") is None
     assert [t.title for t in board.orphaned_tasks] == ["#7", "#8", "#9", "#10"]
+
+    index = index_tasks(board.tasks, "id")
+    task_titles = lambda ids: [index[_id].title for _id in ids]
+    board.add_lane("silly project")
+    board.remove_state("review")
+    DB.session.commit()
+    board, layout = _load_board()
+    assert [t.title for t in board.orphaned_tasks] == ["#9", "#10"]
+    lane = layout["silly project"]
+    assert task_titles(lane["to do"]) == ["#7"]
+    assert task_titles(lane["done"]) == ["#8"]
 
 
 def _load_board():
