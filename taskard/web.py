@@ -65,7 +65,8 @@ def board(board_title, edit_mode=False):
     if not board:
         abort(404, "board '%s' does not exist or access is restricted" % board_title)
 
-    return _render("board.html", title=board.title, board=board)
+    return _render("board.html", title=board.title, board=board,
+            orphaned_tasks=board.orphaned_tasks)
 
 
 @app.route("/boards/<board_title>/edit") # XXX: namespace hogging (cf. `task`)
