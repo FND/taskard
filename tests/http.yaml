@@ -58,11 +58,11 @@ tests:
   POST: /boards/dummy
   request_headers:
       Content-Type: application/x-www-form-urlencoded
-  data: lane=sample%20project&state=to%20do&state=done
+  data: lane=sample%20project&state=todo&state=done&rm-state=in%20progress
 
   status: 302
   response_headers:
-      Location: $SCHEME://$NETLOC/boards/dummy
+      Location: $SCHEME://$NETLOC/boards/dummy/edit
 
 - name: retrieve updated board
   GET: /boards/dummy
@@ -72,7 +72,7 @@ tests:
       table .tasks: 2 # lanes * states
 
 - name: retrieve individual task
-  GET: $RESPONSE_HTML[".tasks a@href"]
+  GET: $RESPONSE_HTML["table .tasks a@href"]
 
   status: 200
 

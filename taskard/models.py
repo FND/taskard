@@ -115,6 +115,21 @@ class Board(db.Model, Record):
 
         task.board = self
 
+    def rename_state(self, index, old_name, new_name):
+        if new_name in self.states:
+            raise ValidationError("state '%s' already exists" % new_name)
+
+        self.states[index] = new_name
+        flag_modified(self, "states")
+
+        for lane, states in self.layout.items():
+            tasks = states.pop(old_name, None)
+            if tasks:
+                states[new_name] = tasks
+                modified = True
+        if modified:
+            flag_modified(self, "layout")
+
     def add_state(self, state):
         dupe = state in self.states
 
@@ -141,7 +156,8 @@ class Board(db.Model, Record):
         return dupe
 
     def remove_state(self, state):
-        self.states.remove(state)
+        index = self.states.index(state)
+        self.states.pop(index)
         flag_modified(self, "states")
 
         modified = False
@@ -151,6 +167,18 @@ class Board(db.Model, Record):
                 modified = True
         if modified:
             flag_modified(self, "layout")
+
+        return index
+
+    def rename_lane(self, index, old_name, new_name):
+        if new_name in self.lanes:
+            raise ValidationError("lane '%s' already exists" % new_name)
+
+        self.lanes[index] = new_name
+        flag_modified(self, "lanes")
+
+        self.layout[new_name] = self.layout.pop(old_name)
+        flag_modified(self, "layout")
 
     def add_lane(self, lane):
         dupe = lane in self.lanes
@@ -173,11 +201,14 @@ class Board(db.Model, Record):
         return dupe
 
     def remove_lane(self, lane):
-        self.lanes.remove(lane)
+        index = self.lanes.index(lane)
+        self.lanes.pop(index)
         flag_modified(self, "lanes")
 
         self.layout.pop(lane)
         flag_modified(self, "layout")
+
+        return index
 
     def validate(self):
         if not self.title:

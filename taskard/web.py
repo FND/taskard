@@ -37,11 +37,14 @@ def boards():
 
 @app.route("/boards/<board_title>", methods=["GET", "POST"])
 def board(board_title, edit_mode=False):
-    if request.method == "POST":
+    if request.method == "POST": # TODO: conflict detection
         form = request.form
         board = Board.load("title", "lanes", "states", "layout").get(board_title)
 
-        _update_board_axes(board, form.getlist("lane"), form.getlist("state"))
+        new_lanes = form.getlist("lane")
+        old_lanes = list(board.lanes)
+        new_states = form.getlist("state")
+        old_states = list(board.states)
 
         edit = True # TODO: edits should not be persisted until saved explicitly
         if "add-lane" in form:
@@ -49,11 +52,18 @@ def board(board_title, edit_mode=False):
         elif "add-state" in form:
             board.add_state("")
         elif form.get("rm-lane") is not None:
-            board.remove_lane(form["rm-lane"])
+            index = board.remove_lane(form["rm-lane"])
+            new_lanes[index] = old_lanes[index] # avoids renaming
         elif form.get("rm-state") is not None:
-            board.remove_state(form["rm-state"])
+            index = board.remove_state(form["rm-state"])
+            new_states[index] = old_states[index] # avoids renaming
         else:
             edit = False
+
+        for i, old_name, new_name in _diff(old_lanes, new_lanes):
+            board.rename_lane(i, old_name, new_name)
+        for i, old_name, new_name in _diff(old_states, new_states):
+            board.rename_state(i, old_name, new_name)
 
         DB.session.commit()
         endpoint = "edit_board" if edit else "board"
@@ -86,6 +96,13 @@ def task(board_title, task_id):
     return "" # TODO
 
 
+def _diff(old_list, new_list):
+    for i, new_name in enumerate(new_list):
+        old_name = old_list[i]
+        if new_name != old_name:
+            yield i, old_name, new_name
+
+
 def _render(template, **params):
     try:
         params["title"] = "%s | Taskard" % params["title"]
@@ -93,17 +110,3 @@ def _render(template, **params):
         params["title"] = "Taskard"
 
     return render_template(template, **params)
-
-
-def _update_board_axes(board, lanes, states):
-    lanes, states = set(lanes), set(states)
-    _update_list(set(board.lanes), lanes, board.add_lane, board.remove_lane)
-    _update_list(set(board.states), states, board.add_state, board.remove_state)
-
-
-def _update_list(before, after, add, remove):
-    # FIXME: does not support renames (retaining associated tasks)
-    for item in before - after:
-        remove(item)
-    for item in after - before:
-        add(item)
